@@ -1,0 +1,52 @@
+# Example YAML for lut_puller
+# Each top-level key is the LUT variable name. Fill in the placeholders
+# and run: python3 lut_puller.py example.yaml
+
+widget:
+  # required: Azure / Graph credentials and identifiers
+  tenant-id: YOUR_TENANT_ID
+  client-id: YOUR_CLIENT_ID
+  client-secret: YOUR_CLIENT_SECRET
+  scope: https://graph.microsoft.com/.default
+  username: user@example.com
+  password: S3cr3tP@ss
+  graph-drive-id: YOUR_DRIVE_ID
+  graph-file-id: YOUR_FILE_ID
+  graph-worksheet-id: YOUR_WORKSHEET_ID
+  # optional: write this variable's LUT entries to a specific file
+  output-path: ./widget.lut
+  # optional: either header names (strings) or zero-based indices (ints)
+  key-col: key
+  val-col: val
+
+# Multiple variables can be defined in the same file. Variables without
+# an explicit `output-path` go to ./lut.txt by default.
+
+gadget:
+  tenant-id: YOUR_TENANT_ID
+  client-id: YOUR_CLIENT_ID
+  client-secret: YOUR_CLIENT_SECRET
+  scope: https://graph.microsoft.com/.default
+  username: user@example.com
+  password: S3cr3tP@ss
+  graph-drive-id: ANOTHER_DRIVE_ID
+  graph-file-id: ANOTHER_FILE_ID
+  graph-worksheet-id: ANOTHER_WORKSHEET_ID
+  # no output-path -> defaults to ./lut.txt
+
+# You can also use numeric column indices (zero-based) if you prefer.
+# Example: key in column 1, value in column 2 (first row is header when using names).
+
+doodad:
+  tenant-id: YOUR_TENANT_ID
+  client-id: YOUR_CLIENT_ID
+  client-secret: YOUR_CLIENT_SECRET
+  scope: https://graph.microsoft.com/.default
+  username: user@example.com
+  password: S3cr3tP@ss
+  graph-drive-id: DRIVE_ID_3
+  graph-file-id: FILE_ID_3
+  graph-worksheet-id: SHEET_ID_3
+  key-col: 1
+  val-col: 2
+  output-path: ./other.txt

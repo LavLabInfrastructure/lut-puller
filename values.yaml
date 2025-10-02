@@ -1,0 +1,49 @@
+image:
+  repository: ghcr.io/lavlabinfrastructure/lut-puller
+  tag: latest
+  pullPolicy: IfNotPresent
+
+schedule: "0 * * * *"
+
+config:
+  # Provide existing secret name containing YAML files; files should have .yaml or .yml suffix.
+  existingSecret: ""
+  # When inlineConfigs is provided, the chart will create a Secret named {{ include "lut-puller.fullname" . }}-config.
+  inlineConfigs: []
+  # Each entry should be an object with `name` (filename) and `data` (YAML content).
+  # Example:
+  # inlineConfigs:
+  #   - name: widget.yaml
+  #     data: |
+  #       widget:
+  #         tenant-id: ...
+
+configMountPath: /config
+
+output:
+  enabled: true
+  existingClaim: ""
+  mountPath: /data
+
+pod:
+  annotations: {}
+  labels: {}
+  serviceAccountName: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  securityContext: {}
+  containerSecurityContext: {}
+
+resources: {}
+
+extraEnv: []
+
+successfulJobsHistoryLimit: 1
+failedJobsHistoryLimit: 1
+
+backoffLimit: 1
+
+startingDeadlineSeconds: null
+
+concurrencyPolicy: Forbid

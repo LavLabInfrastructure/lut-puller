@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "lut-puller.fullname" . }}
+  labels:
+    {{- include "lut-puller.labels" . | nindent 4 }}
+  {{- with .Values.pod.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  successfulJobsHistoryLimit: {{ .Values.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit }}
+  {{- if .Values.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ .Values.startingDeadlineSeconds }}
+  {{- end }}
+  concurrencyPolicy: {{ .Values.concurrencyPolicy }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.backoffLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "lut-puller.selectorLabels" . | nindent 12 }}
+          {{- with .Values.pod.annotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        spec:
+          restartPolicy: OnFailure
+          {{- with .Values.pod.serviceAccountName }}
+          serviceAccountName: {{ . }}
+          {{- end }}
+          {{- with .Values.pod.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.pod.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.pod.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.pod.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: lut-puller
+              image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+                - /entrypoint.sh
+              env:
+                - name: CONFIG_DIR
+                  value: {{ .Values.configMountPath | quote }}
+                {{- range $env := .Values.extraEnv }}
+                - name: {{ $env.name }}
+                  value: {{ $env.value | quote }}
+                {{- end }}
+              {{- with .Values.pod.containerSecurityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              volumeMounts:
+                {{- if .Values.output.enabled }}
+                - name: output
+                  mountPath: {{ .Values.output.mountPath | quote }}
+                {{- end }}
+                - name: config
+                  mountPath: {{ .Values.configMountPath | quote }}
+                  readOnly: true
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+          volumes:
+            - name: config
+              {{- if .Values.config.existingSecret }}
+              secret:
+                secretName: {{ .Values.config.existingSecret }}
+              {{- else if .Values.config.inlineConfigs }}
+              secret:
+                secretName: {{ include "lut-puller.fullname" . }}-config
+              {{- else }}
+              emptyDir: {}
+              {{- end }}
+            {{- if .Values.output.enabled }}
+            - name: output
+              persistentVolumeClaim:
+                claimName: {{ .Values.output.existingClaim }}
+            {{- end }}
+          {{- if and .Values.output.enabled (eq .Values.output.mountPath .Values.configMountPath) }}
+          {{- fail "output.mountPath cannot be the same as configMountPath" }}
+          {{- end }}

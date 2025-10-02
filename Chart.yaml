@@ -1,0 +1,6 @@
+apiVersion: v2
+name: lut-puller
+version: 0.1.0
+appVersion: "0.1.0"
+description: "Cron-based Microsoft Graph LUT puller"
+type: application
