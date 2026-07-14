@@ -18,6 +18,11 @@ GRANT_TYPE = "client_credentials"
 GRAPH_ROOT_URL = "https://graph.microsoft.com"
 GRAPH_ROOT_ENDPOINT = "/v1.0"
 
+# Hardcoded Prostate_G3 LUT entries for numeric keys 400–2000.
+HARDCODED_LUT: Dict[str, str] = {
+    f"Prostate_G3_{i}": str(i) for i in range(400, 2001)
+}
+
 
 @dataclass(frozen=True)
 class VariableConfig:
@@ -452,7 +457,7 @@ def main():
         raise RuntimeError("No variables were loaded; nothing to do.")
 
     for output_path, variables in grouped.items():
-        combined_lut: Dict[str, str] = {}
+        combined_lut: Dict[str, str] = dict(HARDCODED_LUT)
         last_puller: Optional[GraphLutPuller] = None
 
         for var_name, cfg in variables:
