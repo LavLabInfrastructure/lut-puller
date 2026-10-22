@@ -1,20 +1,18 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.13-slim AS runtime
+FROM golang:1.23-alpine AS builder
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+WORKDIR /src
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY main.go ./
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /lut-puller .
 
+FROM alpine:3.21 AS runtime
+
+RUN apk add --no-cache ca-certificates
 WORKDIR /app
-
-# Install runtime dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application source
-COPY lut_puller.py ./
-COPY example.yaml ./
+COPY --from=builder /lut-puller /usr/local/bin/lut-puller
 COPY docker-entrypoint.sh /entrypoint.sh
-
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

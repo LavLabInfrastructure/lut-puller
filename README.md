@@ -1,6 +1,6 @@
 # Helm Chart: lut-puller
 
-This chart deploys the Microsoft Graph LUT puller as a Kubernetes `CronJob`. It fetches data via the container image (built from this repo) on a schedule, producing LUT text files.
+This chart deploys the Microsoft Graph LUT puller as a Kubernetes `CronJob`. It fetches data via the container image (built from this repo) on a schedule, producing LUT text files. The application is written in Go and reads YAML configuration files.
 
 ## Configuration Options
 
@@ -23,6 +23,17 @@ This chart deploys the Microsoft Graph LUT puller as a Kubernetes `CronJob`. It 
 | `startingDeadlineSeconds` | Optional deadline in seconds for starting the job | `null` |
 | `concurrencyPolicy` | CronJob concurrency policy | `Forbid` |
 | `pod.*` | Pod-level overrides (annotations, labels, etc.) | `{}` |
+
+## Build locally
+
+Requires Go 1.23 or newer. Build and run with one or more YAML configuration files:
+
+```sh
+go build -o lut-puller .
+./lut-puller config.yaml
+```
+
+The container entrypoint also accepts explicit config paths; with no arguments, it loads `*.yaml` and `*.yml` files from `CONFIG_DIR` (default `/config`). Keep credentials out of source control and rotate any credentials that have been exposed.
 
 ## Usage
 

@@ -2,11 +2,10 @@
 set -eu
 
 CONFIG_DIR=${CONFIG_DIR:-/config}
-PYTHON_BIN=${PYTHON_BIN:-python3}
-APP_PATH=${APP_PATH:-/app/lut_puller.py}
+APP_BIN=${APP_BIN:-/usr/local/bin/lut-puller}
 
 if [ "$#" -gt 0 ]; then
-    exec "$PYTHON_BIN" "$APP_PATH" "$@"
+    exec "$APP_BIN" "$@"
 fi
 
 set -- "$CONFIG_DIR"/*.yaml "$CONFIG_DIR"/*.yml
@@ -23,4 +22,4 @@ if [ -z "$FILES" ]; then
 fi
 
 # shellcheck disable=SC2086
-exec "$PYTHON_BIN" "$APP_PATH" $FILES
+exec "$APP_BIN" $FILES
